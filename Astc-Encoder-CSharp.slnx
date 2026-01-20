@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Astc-Encoder-CSharp-Generator/Astc-Encoder-CSharp-Generator.csproj" />
+  <Project Path="Astc-Encoder-CSharp/Astc-Encoder-CSharp.csproj" Id="5b27ec01-7c94-4b74-9d6c-803ab3324812" />
+  <Project Path="AstcEncoderTest/AstcEncoderTest.csproj" Id="942cff51-8425-4b19-af74-828d983987cd" />
+  <Project Path="AstcGeneratorTaskTest/AstcGeneratorTaskTest.csproj" />
+</Solution>

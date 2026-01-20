@@ -1,0 +1,51 @@
+﻿<Project Sdk="MSTest.Sdk/4.0.1">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="StbImageSharp" Version="2.30.15" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Astc-Encoder-CSharp\Astc-Encoder-CSharp.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Files\" />
+  </ItemGroup>
+  
+  <Target Name="CopyFromReferenceOutput" AfterTargets="Build">
+    <ItemGroup>
+      <!-- Adjust path and file pattern as needed -->
+      <FilesToCopy Include="$(SolutionDir)Astc-Encoder-CSharp\bin\$(Configuration)\$(TargetFramework)\runtimes\**\*.*" />
+    </ItemGroup>
+
+    <Copy 
+      SourceFiles="@(FilesToCopy)" 
+      DestinationFolder="$(OutputPath)\runtimes\%(RecursiveDir)" 
+      SkipUnchangedFiles="true" />
+  </Target>
+
+
+  <ItemGroup>
+    <None Update="Files\ldr-rgb-diffuse.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Files\ldr-rgb-emissive.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Files\ldr-rgb-metalrough.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Files\ldr-rgb-metalrough2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

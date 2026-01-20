@@ -12,11 +12,14 @@
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
+[Gg]enerated/
+[Rr]untimes/
 x64/
 x86/
 [Ww][Ii][Nn]32/
 [Aa][Rr][Mm]/
 [Aa][Rr][Mm]64/
+[Oo][Ss][Xx]/
 bld/
 [Bb]in/
 [Oo]bj/
@@ -52,3 +55,9 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+#IDE
+.vs
+.vscode
+.fleet
+.idea

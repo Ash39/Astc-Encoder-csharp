@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Astc_Encoder_CSharp</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+    <Title>AstcEncoder c#</Title>
+    <Authors>Ash39</Authors>
+  </PropertyGroup>
+
+  <Import Project="..\Astc-Encoder-CSharp-Generator\build\AsrcGenerator.targets" />
+
+  <ItemGroup>
+    <Libs Include="$(ProjectDir)runtimes\**\*.*" />
+  </ItemGroup>
+  <Target Name="CopyLibs" BeforeTargets="AfterBuild">
+    <Copy SourceFiles="@(Libs)" DestinationFolder="$(OutputPath)\runtimes\%(RecursiveDir)" />
+  </Target>
+
+</Project>

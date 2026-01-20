@@ -1,0 +1,18 @@
+<Project>
+
+  <UsingTask
+        TaskName="Astc_Encoder_CSharp_Generator.AstcGeneratorTask"
+        AssemblyFile="..\bin\$(Configuration)\netstandard2.0\Astc-Encoder-CSharp-Generator.dll" />
+
+  <Target Name="AstcCodeGenTarget" BeforeTargets="PrepareForBuild" >
+    <AstcGeneratorTask  
+      ASTCVersion="latest"
+      ASTCSourceFilePath="Source/astcenc.h"
+      CacheFile="$(IntermediateOutputPath)AstcAssets/cache.cache"
+      MethodExportName="ASTCENC_PUBLIC"
+      GeneraedFilesNamespace="$(RootNamespace)"
+      ProjectPath="$(MSBuildProjectDirectory)"
+      InternalTypes="AstcencImage;AstcencContext"/>
+  </Target>
+</Project>
+
