@@ -38,7 +38,7 @@ jobs:
         name: generator
         if-no-files-found: error
         retention-days: 7
-        path: Astc-Encoder-CSharp-Generator/bin/Release/net10.0/*
+        path: Astc-Encoder-CSharp-Generator/bin/Release/netstandard2.0/*
 
   create_nuget:
     runs-on: ubuntu-latest
@@ -47,7 +47,7 @@ jobs:
     - uses: actions/download-artifact@v4
       with:
         name: generator
-        path: Astc-Encoder-CSharp-Generator/bin/Release/net10.0
+        path: Astc-Encoder-CSharp-Generator/bin/Release/netstandard2.0
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0 # Get all history to allow automatic versioning using MinVer
@@ -97,7 +97,7 @@ jobs:
     - uses: actions/download-artifact@v4
       with:
         name: generator
-        path: Astc-Encoder-CSharp-Generator/bin/Release/net10.0
+        path: Astc-Encoder-CSharp-Generator/bin/Release/netstandard2.0
     - uses: actions/checkout@v4
     - name: Setup .NET
       uses: actions/setup-dotnet@v5
