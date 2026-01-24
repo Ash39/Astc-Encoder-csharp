@@ -46,7 +46,7 @@ jobs:
       with:
         name: generator
         path: Astc-Encoder-CSharp-Generator/bin/Release/netstandard2.0
-    - run: ls -R ./output/
+    - run: ls -R Astc-Encoder-CSharp-Generator/bin/Release/netstandard2.0
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0 # Get all history to allow automatic versioning using MinVer
