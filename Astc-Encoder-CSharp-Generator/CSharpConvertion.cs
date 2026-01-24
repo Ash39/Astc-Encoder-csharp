@@ -92,6 +92,14 @@ namespace Astc_Encoder_CSharp_Generator
                 files.Add(new CSFile($"{mainClassName}.cs", mainFileCode.ToString()));
                 files.Add(new CSFile($"{mainUnmanagedClassName}.cs", mainUnmanagedCode.ToString()));
 
+                Log.LogMessage($"{files.Count} cs files to Generate");
+
+                string folderPath = Path.Combine(path, "Generated");
+
+                Log.LogMessage($"Generating files to {folderPath}");
+
+                Directory.CreateDirectory(folderPath);
+
                 foreach (var file in files)
                 {
                     StringBuilder fileUsings = new StringBuilder();
@@ -104,10 +112,6 @@ namespace Astc_Encoder_CSharp_Generator
                     fileUsings.AppendLine(file.Code);
                     fileUsings.AppendLine("#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member;");
                     file.Code = fileUsings.ToString();
-
-                    string folderPath = Path.Combine(path, "Generated");
-
-                    Directory.CreateDirectory(folderPath);
 
                     string filePath = Path.Combine(folderPath, file.Name);
 
