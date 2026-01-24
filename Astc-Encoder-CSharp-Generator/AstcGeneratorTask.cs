@@ -93,7 +93,7 @@ namespace Astc_Encoder_CSharp_Generator
                             }
                         }
                         Log.LogMessage(MessageImportance.High, "Generating C# bindings from cached ASTC source XML.");
-                        CSharpConvertion.CreateBindings(sourceDownload, ASTCSourceFilePath, GeneraedFilesNamespace, ProjectPath, InternalTypes.Split(';'));
+                        CSharpConvertion.CreateBindings(Log, sourceDownload, ASTCSourceFilePath, GeneraedFilesNamespace, ProjectPath, InternalTypes.Split(';'));
 
                         Log.LogCommandLine(MessageImportance.High, "Extracting ASTC runtime libraries from cached assets...");
 
@@ -162,7 +162,7 @@ namespace Astc_Encoder_CSharp_Generator
             }
 
             Log.LogMessage(MessageImportance.High, "Generating C# bindings from ASTC source XML.");
-            CSharpConvertion.CreateBindings(sourceDownload, ASTCSourceFilePath, GeneraedFilesNamespace, ProjectPath, InternalTypes.Split(';'));
+            CSharpConvertion.CreateBindings(Log, sourceDownload, ASTCSourceFilePath, GeneraedFilesNamespace, ProjectPath, InternalTypes.Split(';'));
 
             string[] assets = DownloadReleaseAssets();
             try

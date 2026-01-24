@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using Microsoft.Build.Utilities;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Formatting;
 using System;
@@ -34,7 +35,7 @@ namespace Astc_Encoder_CSharp_Generator
             public string Code { get; internal set; }
         }
 
-        public static void CreateBindings(AstcSourceDownload sourceDownload, string fileName, string nameSpace, string path, string[] internaltypes)
+        public static void CreateBindings(TaskLoggingHelper Log,AstcSourceDownload sourceDownload, string fileName, string nameSpace, string path, string[] internaltypes)
         {
             using (MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(sourceDownload.Xml))) 
             {
@@ -109,6 +110,8 @@ namespace Astc_Encoder_CSharp_Generator
                     Directory.CreateDirectory(folderPath);
 
                     string filePath = Path.Combine(folderPath, file.Name);
+
+                    Log.LogMessage($"Generating cs file at {filePath}");
 
                     File.WriteAllText(filePath, FormatCSharp(file.Code));
                 }
