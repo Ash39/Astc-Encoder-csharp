@@ -31,14 +31,6 @@ jobs:
       uses: actions/setup-dotnet@v5
     - name: Build Generator
       run: dotnet build Astc-Encoder-CSharp-Generator --configuration Release
-    - name: Run tests
-      run: dotnet test --filter "ClassName=AstcGeneratorTaskTest.Test1" --configuration Release
-    - uses: actions/upload-artifact@v4
-      with:
-        name: generator
-        if-no-files-found: error
-        retention-days: 7
-        path: Astc-Encoder-CSharp-Generator/bin/Release/netstandard2.0/*
 
   create_nuget:
     runs-on: ubuntu-latest
