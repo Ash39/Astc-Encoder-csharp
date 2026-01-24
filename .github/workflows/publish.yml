@@ -26,8 +26,6 @@ jobs:
   create_nuget:
     runs-on: ubuntu-latest
     steps:
-    - name: Build Generator
-      run: dotnet build Astc-Encoder-CSharp-Generator --configuration Release
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0 # Get all history to allow automatic versioning using MinVer
@@ -35,6 +33,9 @@ jobs:
     # Install the .NET SDK indicated in the global.json file
     - name: Setup .NET
       uses: actions/setup-dotnet@v5
+
+    - name: Build Generator
+      run: dotnet build Astc-Encoder-CSharp-Generator --configuration Release
 
     # Create the NuGet package in the folder from the environment variable NuGetDirectory
     - run: dotnet pack Astc-Encoder-CSharp --configuration Release --output ${{ env.NuGetDirectory }}
@@ -74,11 +75,11 @@ jobs:
   run_test:
     runs-on: ubuntu-latest
     steps:
-    - name: Build Generator
-      run: dotnet build Astc-Encoder-CSharp-Generator --configuration Release
     - uses: actions/checkout@v4
     - name: Setup .NET
       uses: actions/setup-dotnet@v5
+    - name: Build Generator
+      run: dotnet build Astc-Encoder-CSharp-Generator --configuration Release
     - name: Run tests
       run: dotnet test --configuration Release
 
