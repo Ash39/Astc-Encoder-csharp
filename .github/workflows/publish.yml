@@ -32,7 +32,7 @@ jobs:
     - name: Build Generator
       run: dotnet build Astc-Encoder-CSharp-Generator --configuration Release
     - name: Run tests
-      run: dotnet test --filter "FullyQualifiedName=AstcGeneratorTaskTest.Test1" --configuration Release
+      run: dotnet test --filter "ClassName=AstcGeneratorTaskTest.Test1" --configuration Release
     - uses: actions/upload-artifact@v4
       with:
         name: generator
@@ -93,6 +93,7 @@ jobs:
 
   run_test:
     runs-on: ubuntu-latest
+    needs: [ build_generator ]
     steps:
     - uses: actions/download-artifact@v4
       with:
