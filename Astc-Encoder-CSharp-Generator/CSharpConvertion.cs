@@ -77,8 +77,8 @@ namespace Astc_Encoder_CSharp_Generator
                         case Method method:
                             mainUnmanagedCode.AppendLine(MethodGeneration(method));
                             break;
+                            }
                     }
-                }
 
                 foreach (var buffer in buffers)
                 {
@@ -96,10 +96,12 @@ namespace Astc_Encoder_CSharp_Generator
                     StringBuilder fileUsings = new StringBuilder();
                     fileUsings.AppendLine("using System;");
                     fileUsings.AppendLine("using System.Runtime.InteropServices;");
-                    fileUsings.AppendLine("using static Astc_Encoder_CSharp.Astcenc;");
+                    fileUsings.AppendLine($"using static {nameSpace}.Astcenc;");
                     fileUsings.AppendLine();
                     fileUsings.AppendLine($"namespace {nameSpace};");
+                    fileUsings.AppendLine("#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member;");
                     fileUsings.AppendLine(file.Code);
+                    fileUsings.AppendLine("#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member;");
                     file.Code = fileUsings.ToString();
 
                     string folderPath = Path.Combine(path, "Generated");
@@ -457,10 +459,8 @@ namespace Astc_Encoder_CSharp_Generator
                     break;
             }
 
-            // ---- Re-apply pointers ----
             if (pointerDepth > 0)
             {
-                // void* is valid in C#
                 if (resolved == "void")
                     return "void" + new string('*', pointerDepth);
 

@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Astc_Encoder_CSharp
+namespace AstcEncoder
 {
-
+    /// <summary>
+    /// An uncompressed 2D or 3D image.
+    /// 3D image are passed in as an array of 2D slices. Each slice has identical size and color format.
+    /// </summary>
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public ref struct AstcencImage
     {

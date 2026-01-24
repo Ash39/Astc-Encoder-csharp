@@ -2,10 +2,13 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Astc_Encoder_CSharp
+namespace AstcEncoder
 {
+    /// <summary>
+    /// An opaque structure; see  astcenc_internal.h for definition.
+    /// </summary>
     public struct AstcencContext
     {
-        public IntPtr internal_context;
+        internal IntPtr internal_context;
     }
 }

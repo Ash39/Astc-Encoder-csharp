@@ -1,11 +1,9 @@
-﻿using Astc_Encoder_CSharp;
+﻿using AstcEncoder;
 using Microsoft.VisualStudio.TestPlatform.Utilities;
 using StbImageSharp;
 using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using static Astc_Encoder_CSharp.Astcenc;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AstcEncoderTest
 {

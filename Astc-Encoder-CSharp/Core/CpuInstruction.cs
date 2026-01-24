@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Astc_Encoder_CSharp
+namespace AstcEncoder
 {
-    public enum CpuInstruction
+    internal enum CpuInstruction
     {
         SSE2,
         SSE4_1,

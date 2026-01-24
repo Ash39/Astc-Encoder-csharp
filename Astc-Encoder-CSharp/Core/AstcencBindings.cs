@@ -10,7 +10,7 @@ using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.Arm;
 using System.Runtime.Intrinsics.X86;
 
-namespace Astc_Encoder_CSharp
+namespace AstcEncoder
 {
     public partial class Astcenc
     {
@@ -137,17 +137,56 @@ namespace Astc_Encoder_CSharp
         }
 
 
-        public unsafe static AstcencError AstcencConfigInit(AstcencProfile profile, uint blockX, uint blockY, uint blockZ, float quality, uint flags, out AstcencConfig config)
+        /// <summary>
+        /// Populate a codec config based on default settings.
+        /// </summary>
+        /// <remarks>
+        /// Power users can edit the returned config struct to fine tune before allocating the context.
+        /// </remarks>
+        /// <param name="profile">Color profile.</param>
+        /// <param name="blockX">ASTC block size X dimension.</param>
+        /// <param name="blockY">ASTC block size Y dimension.</param>
+        /// <param name="blockZ">ASTC block size Z dimension.</param>
+        /// <param name="quality">
+        /// Search quality preset / effort level. Either an ASTCENC_PRE_* value,
+        /// or an effort level between 0 and 100. Performance is not linear between 0 and 100.
+        /// </param>
+        /// <param name="flags">A valid set of ASTCENC_FLG_* flag bits.</param>
+        /// <param name="config">(out) Output config struct to populate.</param>
+        /// <returns>
+        /// AstcencSuccess on success, or an error if the inputs are invalid either individually,
+        /// or in combination.
+        /// </returns>
+        public unsafe static AstcencError AstcencConfigInit(AstcencProfile profile, uint blockX, uint blockY, uint blockZ, float quality, AstcencFlags flags, out AstcencConfig config)
         { 
             AstcencConfig configRef;
 
-            AstcencError status = AstcencUnmanaged.AstcencConfigInit(profile, blockX, blockY, blockZ, quality, flags, &configRef);
+            AstcencError status = AstcencUnmanaged.AstcencConfigInit(profile, blockX, blockY, blockZ, quality, (uint)flags, &configRef);
 
             config = Unsafe.AsRef<AstcencConfig>(ref configRef);
 
             return status;
         }
 
+        /// <summary>
+        /// Allocate a new codec context based on a config.
+        /// </summary>
+        /// <remarks>
+        /// This function allocates all of the memory resources and threads needed by the codec.
+        /// This can be slow, so it is recommended that contexts are reused to serially compress or
+        /// decompress multiple images to amortize setup cost.
+        ///
+        /// Contexts can be allocated to support only decompression using the
+        /// ASTCENC_FLG_DECOMPRESS_ONLY flag when creating the configuration. The compression
+        /// functions will fail if invoked. For a decompress-only library build the
+        /// ASTCENC_FLG_DECOMPRESS_ONLY flag must be set when creating any context.
+        /// </remarks>
+        /// <param name="config">(in) Codec config.</param>
+        /// <param name="threadCount">Thread count to configure for.</param>
+        /// <param name="context">(out) Location to store an opaque context pointer.</param>
+        /// <returns>
+        /// AstcencSuccess on success, or an error if context creation failed.
+        /// </returns>
         public unsafe static AstcencError AstcencContextAlloc(ref AstcencConfig config, uint threadCount, out AstcencContext context) 
         {
             AstcencContextInternal* astcencContext;
@@ -159,6 +198,24 @@ namespace Astc_Encoder_CSharp
             return status;
         }
 
+        /// <summary>
+        /// Compress an image.
+        /// </summary>
+        /// <remarks>
+        /// A single context can only compress or decompress a single image at a time.
+        ///
+        /// For a context configured for multi-threading, any set of the N threads can call this
+        /// function. Work will be dynamically scheduled across the threads available. Each thread
+        /// must have a unique thread_index.
+        /// </remarks>
+        /// <param name="context">Codec context.</param>
+        /// <param name="image">(in,out) An input image, in 2D slices.</param>
+        /// <param name="swizzle">Compression data swizzle, applied before compression.</param>
+        /// <param name="dataOut">(out) Span to output data array.</param>
+        /// <param name="threadIndex">Thread index [0..N-1] of calling thread.</param>
+        /// <returns>
+        /// AstcencSuccess on success, or an error if compression failed.
+        /// </returns>
         public unsafe static AstcencError AstcencCompressImage(AstcencContext context, ref AstcencImage image, AstcencSwizzle swizzle, Span<byte> dataOut, uint threadIndex)
         {
             fixed (void* dataPtr = image.data) 
@@ -177,12 +234,51 @@ namespace Astc_Encoder_CSharp
             }
         }
 
+        /// <summary>
+        /// Reset the codec state for a new compression.
+        /// </summary>
+        /// <remarks>
+        /// The caller is responsible for synchronizing threads in the worker thread pool. This
+        /// function must only be called when all threads have exited the
+        /// astcenc_compress_image function for image N, but before any thread enters it for
+        /// image N + 1.
+        ///
+        /// Calling this is not required (but won't hurt), if the context is created for
+        /// single threaded use.
+        /// </remarks>
+        /// <param name="context">Codec context.</param>
+        /// <returns>
+        /// AstcencSuccess on success, or an error if reset failed.
+        /// </returns>
         public unsafe static AstcencError AstcencCompressReset(AstcencContext context) =>
             AstcencUnmanaged.AstcencCompressReset((AstcencContextInternal*)context.internal_context);
 
+        /// <summary>
+        /// Cancel any pending compression operation.
+        /// </summary>
+        /// <remarks>
+        /// The caller must behave as if the compression completed normally, even though the data
+        /// will be undefined. They are still responsible for synchronizing threads in the worker
+        /// thread pool, and must call reset before starting another compression.
+        /// </remarks>
+        /// <param name="context">Codec context.</param>
+        /// <returns>
+        /// AstcencSuccess on success, or an error if cancellation failed.
+        /// </returns>
         public unsafe static AstcencError AstcencCompressCancel(AstcencContext context)=>
             AstcencUnmanaged.AstcencCompressCancel((AstcencContextInternal*)context.internal_context);
 
+        /// <summary>
+        /// Decompress an image.
+        /// </summary>
+        /// <param name="context">Codec context.</param>
+        /// <param name="data">(in) Span to compressed data.</param>
+        /// <param name="imageOut">(in,out) Output image.</param>
+        /// <param name="swizzle">Decompression data swizzle, applied after decompression.</param>
+        /// <param name="threadIndex">Thread index [0..N-1] of calling thread.</param>
+        /// <returns>
+        /// AstcencSuccess on success, or an error if decompression failed.
+        /// </returns>
         public unsafe static AstcencError AstcencDecompressImage(AstcencContext context, Span<byte> data, ref AstcencImage imageOut, AstcencSwizzle swizzle, uint threadIndex) 
         {
             fixed (byte* dataPtr = data)
@@ -200,13 +296,47 @@ namespace Astc_Encoder_CSharp
                 }
             }
         }
-
+        /// <summary>
+        /// Reset the codec state for a new decompression.
+        /// </summary>
+        /// <remarks>
+        /// The caller is responsible for synchronizing threads in the worker thread pool. This
+        /// function must only be called when all threads have exited the
+        /// astcenc_decompress_image function for image N, but before any thread enters it for
+        /// image N + 1.
+        ///
+        /// Calling this is not required (but won't hurt), if the context is created for
+        /// single threaded use.
+        /// </remarks>
+        /// <param name="context">Codec context.</param>
+        /// <returns>
+        /// AstcencSuccess on success, or an error if reset failed.
+        /// </returns>
         public unsafe static AstcencError AstcencDecompressReset(AstcencContext context) =>
             AstcencUnmanaged.AstcencDecompressReset((AstcencContextInternal*)context.internal_context);
 
+        /// <summary>
+        /// Free the compressor context.
+        /// </summary>
+        /// <param name="context">The codec context.</param>
         public unsafe static void AstcencContextFree(AstcencContext context) =>
             AstcencUnmanaged.AstcencContextFree((AstcencContextInternal*)context.internal_context);
 
+        /// <summary>
+        /// Provide a high level summary of a block's encoding.
+        /// </summary>
+        /// <remarks>
+        /// This feature is primarily useful for codec developers but may be useful for developers
+        /// building advanced content packaging pipelines.
+        /// </remarks>
+        /// <param name="context">Codec context.</param>
+        /// <param name="data">One block of compressed ASTC data.</param>
+        /// <param name="info">The output info structure to populate.</param>
+        /// <returns>
+        /// AstcencSuccess if the block was decoded, or an error otherwise. Note that this
+        /// function will return success even if the block itself was an error block encoding,
+        /// as the decode was correctly handled.
+        /// </returns>
         public unsafe static AstcencError AstcencGetBlockInfo(AstcencContext context, Span<byte> data, out AstcencBlockInfo info) 
         {
             AstcencBlockInfo astcencBlockInfo;
@@ -227,6 +357,11 @@ namespace Astc_Encoder_CSharp
             
         }
 
+        /// <summary>
+        /// Get a printable string for a specific status code.
+        /// </summary>
+        /// <param name="status">The status value.</param>
+        /// <returns>A human readable null-terminated string.</returns>
         public unsafe static string? GetErrorString(AstcencError status) 
         {
             return Marshal.PtrToStringAnsi((IntPtr)(void*)AstcencUnmanaged.AstcencGetErrorString(status));
