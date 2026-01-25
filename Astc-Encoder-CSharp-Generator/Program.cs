@@ -62,19 +62,22 @@ namespace Astc_Encoder_CSharp_Generator
             Option<string> InternalTypesOption = new("--InternalTypes")
             {
                 Required = false,
-                Description = ""
+                Description = "",
+                DefaultValueFactory = (res) => string.Empty
             };
 
             Option<string> PreprocessersOption = new("--Preprocessers")
             {
                 Required = false,
-                Description = ""
+                Description = "",
+                DefaultValueFactory = (res) => string.Empty
             };
 
             Option<bool> DisableXmlCacheOption = new("--DisableXmlCache")
             {
                 Required = false,
-                Description = ""
+                Description = "",
+                DefaultValueFactory = (res) => false
             };
 
             rootCommand.Add(ASTCVersionOption);
@@ -148,16 +151,9 @@ namespace Astc_Encoder_CSharp_Generator
                                 Console.Error.WriteLine("Failed to convert ASTC source code to XML.");
                                 return false;
                             }
-                            try
-                            {
-                                Console.WriteLine("Updating cache file with new XML data.");
-                                File.WriteAllText(CacheFile, JsonSerializer.Serialize<AstcSourceDownload>(sourceDownload));
-                            }
-                            catch (Exception e)
-                            {
-                                Console.Error.WriteLine(e.Message);
-                                return false;
-                            }
+
+                            Console.WriteLine("Updating cache file with new XML data.");
+                            File.WriteAllText(CacheFile, JsonSerializer.Serialize<AstcSourceDownload>(sourceDownload));
                         }
                         Console.WriteLine("Generating C# bindings from cached ASTC source XML.");
                         CSharpConvertion.CreateBindings(sourceDownload, ASTCSourceFilePath, GeneraedFilesNamespace, ProjectPath, InternalTypes.Split(';'));
@@ -215,7 +211,7 @@ namespace Astc_Encoder_CSharp_Generator
 
                 Console.WriteLine("Converting ASTC source code to XML...");
 
-                CTokensToXml.ConvertTokensToXml(sourceDownload, preprocessers.Split(';'), methodExportName);
+                CTokensToXml.ConvertTokensToXml(sourceDownload, preprocessers.Split(','), methodExportName);
 
                 Console.WriteLine("Caching ASTC source download...");
 
