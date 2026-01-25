@@ -30,13 +30,12 @@ namespace Astc_Encoder_CSharp_Generator
                 Description = ""
             };
 
-            Option<string> ASTCBuildOption = new("--Build")
+            Option<string> ASTCSourceFilePathOption = new("--SourceFilePath")
             {
                 Required = true,
                 Description = ""
             };
-
-            Option<string> ASTCSourceFilePathOption = new("--SourceFilePath")
+            Option<string> CacheFilePathOption = new("--CacheFilePath")
             {
                 Required = true,
                 Description = ""
@@ -62,24 +61,24 @@ namespace Astc_Encoder_CSharp_Generator
 
             Option<string> InternalTypesOption = new("--InternalTypes")
             {
-                Required = true,
+                Required = false,
                 Description = ""
             };
 
             Option<string> PreprocessersOption = new("--Preprocessers")
             {
-                Required = true,
+                Required = false,
                 Description = ""
             };
 
             Option<bool> DisableXmlCacheOption = new("--DisableXmlCache")
             {
-                Required = true,
+                Required = false,
                 Description = ""
             };
 
             rootCommand.Add(ASTCVersionOption);
-            rootCommand.Add(ASTCBuildOption);
+            rootCommand.Add(CacheFilePathOption);
             rootCommand.Add(ASTCSourceFilePathOption);
             rootCommand.Add(MethodExportNameOption);
             rootCommand.Add(GeneratedFilesNamespaceOption);
@@ -95,7 +94,7 @@ namespace Astc_Encoder_CSharp_Generator
                     return;
                 }
 
-                Generate(result.GetValue(ASTCVersionOption), result.GetValue(ASTCBuildOption), result.GetValue(ASTCSourceFilePathOption), result.GetValue(MethodExportNameOption), result.GetValue(GeneratedFilesNamespaceOption), 
+                Generate(result.GetValue(ASTCVersionOption), result.GetValue(ASTCSourceFilePathOption), result.GetValue(CacheFilePathOption), result.GetValue(MethodExportNameOption), result.GetValue(GeneratedFilesNamespaceOption), 
                     result.GetValue(ProjectPathOption), result.GetValue(InternalTypesOption), result.GetValue(PreprocessersOption), result.GetValue(DisableXmlCacheOption));
             });
 
