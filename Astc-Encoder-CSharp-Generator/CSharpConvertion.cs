@@ -1,5 +1,4 @@
-﻿using Microsoft.Build.Utilities;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Formatting;
 using System;
@@ -35,7 +34,7 @@ namespace Astc_Encoder_CSharp_Generator
             public string Code { get; internal set; }
         }
 
-        public static void CreateBindings(TaskLoggingHelper Log,AstcSourceDownload sourceDownload, string fileName, string nameSpace, string path, string[] internaltypes)
+        public static void CreateBindings(AstcSourceDownload sourceDownload, string fileName, string nameSpace, string path, string[] internaltypes)
         {
             using (MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(sourceDownload.Xml))) 
             {
@@ -92,11 +91,11 @@ namespace Astc_Encoder_CSharp_Generator
                 files.Add(new CSFile($"{mainClassName}.cs", mainFileCode.ToString()));
                 files.Add(new CSFile($"{mainUnmanagedClassName}.cs", mainUnmanagedCode.ToString()));
 
-                Log.LogMessage($"{files.Count} cs files to Generate");
+                Console.WriteLine($"{files.Count} cs files to Generate");
 
                 string folderPath = Path.Combine(path, "Generated");
 
-                Log.LogMessage($"Generating files to {folderPath}");
+                Console.WriteLine($"Generating files to {folderPath}");
 
                 Directory.CreateDirectory(folderPath);
 
@@ -115,7 +114,7 @@ namespace Astc_Encoder_CSharp_Generator
 
                     string filePath = Path.Combine(folderPath, file.Name);
 
-                    Log.LogMessage($"Generating cs file at {filePath}");
+                    Console.WriteLine($"Generating cs file at {filePath}");
 
                     File.WriteAllText(filePath, FormatCSharp(file.Code));
                 }
