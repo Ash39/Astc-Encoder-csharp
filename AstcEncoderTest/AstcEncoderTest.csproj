@@ -19,19 +19,10 @@
   <ItemGroup>
     <Folder Include="Files\" />
   </ItemGroup>
-  
-  <Target Name="CopyFromReferenceOutput" AfterTargets="Build">
-    <ItemGroup>
-      <!-- Adjust path and file pattern as needed -->
-      <FilesToCopy Include="$(SolutionDir)Astc-Encoder-CSharp\bin\$(Configuration)\$(TargetFramework)\runtimes\**\*.*" />
-    </ItemGroup>
 
-    <Copy 
-      SourceFiles="@(FilesToCopy)" 
-      DestinationFolder="$(OutputPath)\runtimes\%(RecursiveDir)" 
-      SkipUnchangedFiles="true" />
-  </Target>
-
+  <ItemGroup>
+    <None Include="runtimes\**\*.*" PackagePath="runtimes\" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Update="Files\ldr-rgb-diffuse.png">
