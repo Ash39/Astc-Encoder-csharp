@@ -33,12 +33,12 @@ jobs:
     - name: Build Generator
       run: dotnet build Astc-Encoder-CSharp-Generator --configuration Release --output Generator
     - name: Run Generator
-      run: Generator/Astc-Encoder-CSharp-Generator --ASTCVersion latest \
-           --ASTCSourceFilePath Source/astcenc.h \
-           --CacheFile AstcAssets/cache.cache \
-           --MethodExportName ASTCENC_PUBLIC \
-           --GeneraedFilesNamespace AstcEncoder \
-           --ProjectPath ${{ env.GeneratedFilesDirectory }} \
+      run: Generator/Astc-Encoder-CSharp-Generator --ASTCVersion latest 
+           --ASTCSourceFilePath Source/astcenc.h 
+           --CacheFile AstcAssets/cache.cache 
+           --MethodExportName ASTCENC_PUBLIC 
+           --GeneraedFilesNamespace AstcEncoder 
+           --ProjectPath ${{ env.GeneratedFilesDirectory }} 
            --InternalTypes AstcencImage,AstcencContext
     - uses: actions/upload-artifact@v4
       with:
