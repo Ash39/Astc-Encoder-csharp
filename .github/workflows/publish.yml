@@ -53,13 +53,14 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ build_generator ]
     steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # Get all history to allow automatic versioning using MinVer
+
     - uses: actions/download-artifact@v4
       with:
         name: generatedFiles
         path: ${{ env.GeneratedFilesDirectory }}/Generated
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0 # Get all history to allow automatic versioning using MinVer
 
     # Install the .NET SDK indicated in the global.json file
     - name: Setup .NET
@@ -104,11 +105,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ build_generator ]
     steps:
+    - uses: actions/checkout@v4
     - uses: actions/download-artifact@v4
       with:
         name: generatedFiles
         path: ${{ env.GeneratedFilesDirectory }}/Generated
-    - uses: actions/checkout@v4
     - name: Setup .NET
       uses: actions/setup-dotnet@v5
     - name: Run tests
