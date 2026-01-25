@@ -227,7 +227,7 @@ namespace Astc_Encoder_CSharp_Generator
             Console.WriteLine("Generating C# bindings from ASTC source XML.");
             CSharpConvertion.CreateBindings(sourceDownload, ASTCSourceFilePath, generaedFilesNamespace, projectPath, internalTypes.Split(','));
 
-            string[] assets = DownloadReleaseAssets(ASTCVersion, projectPath);
+            string[] assets = DownloadReleaseAssets(ASTCVersion, cacheFile);
             try
             {
                 if (assets.Length > 0)
