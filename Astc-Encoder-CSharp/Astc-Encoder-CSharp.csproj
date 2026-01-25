@@ -30,8 +30,6 @@
     
   </PropertyGroup>
 
-  <Import Project="..\Astc-Encoder-CSharp-Generator\build\AsrcGenerator.targets" />
-
   <ItemGroup>
     <None Include="runtimes\**\*.*" Pack="true" PackagePath="runtimes\" />
   </ItemGroup>
