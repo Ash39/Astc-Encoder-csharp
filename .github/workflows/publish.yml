@@ -33,7 +33,8 @@ jobs:
     - name: Build Generator
       run: dotnet build Astc-Encoder-CSharp-Generator --configuration Release --output Generator
     - name: Run Generator
-      run: Generator/Astc-Encoder-CSharp-Generator --ASTCVersion latest 
+      run: >
+           Generator/Astc-Encoder-CSharp-Generator --ASTCVersion latest 
            --ASTCSourceFilePath Source/astcenc.h 
            --CacheFile AstcAssets/cache.cache 
            --MethodExportName ASTCENC_PUBLIC 
