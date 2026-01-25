@@ -131,6 +131,8 @@ jobs:
         path: ${{ github.workspace}}/AstcEncoderTest/runtimes
     - name: Setup .NET
       uses: actions/setup-dotnet@v5
+    - name: Build all projects
+      run: dotnet build . --configuration Release
     - name: Run tests
       run: dotnet test --configuration Release
 
