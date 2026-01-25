@@ -21,10 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="runtimes\**\*.*" PackagePath="runtimes\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="Files\ldr-rgb-diffuse.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
