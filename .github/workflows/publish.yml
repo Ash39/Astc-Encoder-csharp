@@ -39,7 +39,7 @@ jobs:
            --MethodExportName ASTCENC_PUBLIC \
            --GeneraedFilesNamespace AstcEncoder \
            --ProjectPath ${{ env.GeneratedFilesDirectory }} \
-           --InternalTypes AstcencImage;AstcencContext
+           --InternalTypes "AstcencImage;AstcencContext"
     - uses: actions/upload-artifact@v4
       with:
         name: generatedFiles
