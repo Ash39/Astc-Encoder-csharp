@@ -260,7 +260,9 @@ namespace Astc_Encoder_CSharp_Generator
 
                Console.WriteLine( $"Extracting ASTC runtime libraries for platform: {libraryPlatform}...");
 
-                string destinationPath = Path.Combine(projectPath, "runtimes", $"{libraryPlatform}-{libraryArchitecture}", "native");
+                string rid = string.IsNullOrEmpty(libraryArchitecture) ? libraryPlatform : $"{libraryPlatform}-{libraryArchitecture}";
+
+                string destinationPath = Path.Combine(projectPath, "runtimes", rid, "native");
 
                 using (ZipArchive archive = ZipFile.OpenRead(assetPath))
                 {

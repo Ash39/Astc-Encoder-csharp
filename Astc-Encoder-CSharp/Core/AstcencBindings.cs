@@ -30,7 +30,6 @@ namespace AstcEncoder
         {
             get 
             {
-                // Determine the library file name first (same logic as before).
                 string libraryFile = Environment.OSVersion.Platform switch
                 {
                     PlatformID.Win32NT => RuntimeInformation.ProcessArchitecture switch
@@ -60,23 +59,7 @@ namespace AstcEncoder
                     PlatformID.MacOSX => "libastcenc-shared.dylib",
                     _ => throw new PlatformNotSupportedException("Unsupported platform"),
                 };
-
-                string platformFolder = Environment.OSVersion.Platform switch
-                {
-                    PlatformID.Win32NT => "windows",
-                    PlatformID.Unix => "linux",
-                    PlatformID.MacOSX => "osx",
-                    _ => throw new PlatformNotSupportedException("Unsupported platform"),
-                };
-
-                string archFolder = RuntimeInformation.ProcessArchitecture switch
-                {
-                    Architecture.X64 => "x64",
-                    Architecture.Arm64 => "arm64",
-                    _ => string.Empty,
-                };
-
-                return Path.Combine("runtimes", platformFolder, archFolder, libraryFile);
+                return libraryFile;
             }
         }
 
