@@ -250,7 +250,7 @@ namespace Astc_Encoder_CSharp_Generator
         {
             foreach (var assetPath in assets)
             {
-                string libraryPlatform = assetPath.ToLower().Contains("windows") ? "windows" :
+                string libraryPlatform = assetPath.ToLower().Contains("windows") ? "win" :
                                           assetPath.ToLower().Contains("linux") ? "linux" :
                                           assetPath.ToLower().Contains("macos") ? "osx" : string.Empty;
 
@@ -260,7 +260,7 @@ namespace Astc_Encoder_CSharp_Generator
 
                Console.WriteLine( $"Extracting ASTC runtime libraries for platform: {libraryPlatform}...");
 
-                string destinationPath = Path.Combine(projectPath, "runtimes", libraryPlatform, libraryArchitecture);
+                string destinationPath = Path.Combine(projectPath, "runtimes", $"{libraryPlatform}-{libraryArchitecture}", "native");
 
                 using (ZipArchive archive = ZipFile.OpenRead(assetPath))
                 {
