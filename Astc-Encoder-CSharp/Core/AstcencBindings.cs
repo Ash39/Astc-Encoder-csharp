@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
@@ -30,36 +30,37 @@ namespace AstcEncoder
         {
             get 
             {
-                string libraryFile = Environment.OSVersion.Platform switch
-                {
-                    PlatformID.Win32NT => RuntimeInformation.ProcessArchitecture switch
+                return
+                    OperatingSystem.IsMacOS() ?
+                    "libastcenc-shared.dylib" :
+                    Environment.OSVersion.Platform switch
                     {
-                        Architecture.X64 => IsAstcencAvx2Supported ? "astcenc-avx2-shared.dll" :
-                                         IsAstcencSSE41Supported ? "astcenc-sse4.1-shared.dll" :
-                                         IsAstcencSSE2Supported ? "astcenc-sse2-shared.dll" :
-                                         throw new PlatformNotSupportedException("The required CPU instructions for x64 architecture are not supported."),
-                        Architecture.Arm64 => IsAstcencSve256Supported ? "astcenc-arm-sve256-shared.dll" :
-                                          IsAstcencSve128Supported ? "astcenc-arm-sve128-shared.dll" :
-                                          IsAstcencNeonSupported ? "astcenc-arm-neon-shared.dll" :
-                                          throw new PlatformNotSupportedException("The required CPU instructions for ARM architecture are not supported."),
-                        _ => throw new PlatformNotSupportedException("Unsupported architecture"),
-                    },
-                    PlatformID.Unix => RuntimeInformation.ProcessArchitecture switch
-                    {
-                        Architecture.X64 => IsAstcencAvx2Supported ? "libastcenc-avx2-shared.so" :
-                                         IsAstcencSSE41Supported ? "libastcenc-sse4.1-shared.so" :
-                                         IsAstcencSSE2Supported ? "libastcenc-sse2-shared.so" :
-                                         throw new PlatformNotSupportedException("The required CPU instructions for x64 architecture are not supported."),
-                        Architecture.Arm64 => IsAstcencSve256Supported ? "libastcenc-sve256-shared.so" :
-                                          IsAstcencSve128Supported ? "libastcenc-sve128-shared.so" :
-                                          IsAstcencNeonSupported ? "libastcenc-neon-shared.so" :
-                                          throw new PlatformNotSupportedException("The required CPU instructions for ARM architecture are not supported."),
-                        _ => throw new PlatformNotSupportedException("Unsupported architecture"),
-                    },
-                    PlatformID.MacOSX => "libastcenc-shared.dylib",
-                    _ => throw new PlatformNotSupportedException("Unsupported platform"),
-                };
-                return libraryFile;
+                        PlatformID.Win32NT => RuntimeInformation.ProcessArchitecture switch
+                        {
+                            Architecture.X64 => IsAstcencAvx2Supported ? "astcenc-avx2-shared.dll" :
+                                             IsAstcencSSE41Supported ? "astcenc-sse4.1-shared.dll" :
+                                             IsAstcencSSE2Supported ? "astcenc-sse2-shared.dll" :
+                                             throw new PlatformNotSupportedException("The required CPU instructions for x64 architecture are not supported."),
+                            Architecture.Arm64 => IsAstcencSve256Supported ? "astcenc-arm-sve256-shared.dll" :
+                                              IsAstcencSve128Supported ? "astcenc-arm-sve128-shared.dll" :
+                                              IsAstcencNeonSupported ? "astcenc-arm-neon-shared.dll" :
+                                              throw new PlatformNotSupportedException("The required CPU instructions for ARM architecture are not supported."),
+                            _ => throw new PlatformNotSupportedException("Unsupported architecture"),
+                        },
+                        PlatformID.Unix => RuntimeInformation.ProcessArchitecture switch
+                        {
+                            Architecture.X64 => IsAstcencAvx2Supported ? "libastcenc-avx2-shared.so" :
+                                             IsAstcencSSE41Supported ? "libastcenc-sse4.1-shared.so" :
+                                             IsAstcencSSE2Supported ? "libastcenc-sse2-shared.so" :
+                                             throw new PlatformNotSupportedException("The required CPU instructions for x64 architecture are not supported."),
+                            Architecture.Arm64 => IsAstcencSve256Supported ? "libastcenc-sve256-shared.so" :
+                                              IsAstcencSve128Supported ? "libastcenc-sve128-shared.so" :
+                                              IsAstcencNeonSupported ? "libastcenc-neon-shared.so" :
+                                              throw new PlatformNotSupportedException("The required CPU instructions for ARM architecture are not supported."),
+                            _ => throw new PlatformNotSupportedException("Unsupported architecture"),
+                        },
+                        _ => throw new PlatformNotSupportedException("Unsupported platform"),
+                    };
             }
         }
 
