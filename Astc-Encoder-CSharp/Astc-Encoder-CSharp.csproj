@@ -35,6 +35,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="runtimes\**\*.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>runtimes\%(RecursiveDir)%(Filename)%(Extension)</TargetPath>
+      <Visible>false</Visible>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="..\README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>

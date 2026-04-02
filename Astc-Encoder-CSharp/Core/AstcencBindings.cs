@@ -22,43 +22,138 @@ namespace AstcEncoder
         private static nint ImportResolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
         {
             if (libraryName == "astcenc")
-                return NativeLibrary.Load(AstcencLibraryName, assembly, searchPath);
+                return LoadAstcencLibrary(assembly, searchPath);
             return NativeLibrary.Load(libraryName, assembly, searchPath);
+        }
+
+        private static nint LoadAstcencLibrary(Assembly assembly, DllImportSearchPath? searchPath)
+        {
+            string libraryFileName = AstcencLibraryName;
+
+            foreach (string candidatePath in GetNativeLibraryCandidatePaths(assembly, libraryFileName))
+            {
+                if (NativeLibrary.TryLoad(candidatePath, out nint handle))
+                {
+                    return handle;
+                }
+            }
+
+            return NativeLibrary.Load(libraryFileName, assembly, searchPath);
+        }
+
+        private static IEnumerable<string> GetNativeLibraryCandidatePaths(Assembly assembly, string libraryFileName)
+        {
+            string? assemblyDirectory = Path.GetDirectoryName(assembly.Location);
+            if (string.IsNullOrEmpty(assemblyDirectory))
+            {
+                yield break;
+            }
+
+            yield return Path.Combine(assemblyDirectory, libraryFileName);
+
+            foreach (string runtimeRid in GetRuntimeIdentifiers())
+            {
+                yield return Path.Combine(assemblyDirectory, runtimeRid, "native", libraryFileName);
+                yield return Path.Combine(assemblyDirectory, "runtimes", runtimeRid, "native", libraryFileName);
+            }
+        }
+
+        private static IEnumerable<string> GetRuntimeIdentifiers()
+        {
+            if (OperatingSystem.IsWindows())
+            {
+                if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
+                {
+                    yield return "win-arm64";
+                    yield break;
+                }
+
+                if (RuntimeInformation.ProcessArchitecture == Architecture.X64)
+                {
+                    yield return "win-x64";
+                    yield break;
+                }
+
+                yield return "win-x86";
+                yield break;
+            }
+
+            if (OperatingSystem.IsLinux())
+            {
+                if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
+                {
+                    yield return "linux-arm64";
+                    yield break;
+                }
+
+                yield return "linux-x64";
+                yield break;
+            }
+
+            if (OperatingSystem.IsMacOS())
+            {
+                yield return "osx";
+
+                if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
+                {
+                    yield return "osx-arm64";
+                    yield return "osx-x64";
+                    yield break;
+                }
+
+                yield return "osx-x64";
+                yield return "osx-arm64";
+            }
         }
 
         private static string AstcencLibraryName 
         {
-            get 
+            get
             {
-                string libraryFile = Environment.OSVersion.Platform switch
+                string libraryFile = string.Empty;
+                if (OperatingSystem.IsWindows())
                 {
-                    PlatformID.Win32NT => RuntimeInformation.ProcessArchitecture switch
+                    libraryFile = RuntimeInformation.ProcessArchitecture switch
                     {
                         Architecture.X64 => IsAstcencAvx2Supported ? "astcenc-avx2-shared.dll" :
-                                         IsAstcencSSE41Supported ? "astcenc-sse4.1-shared.dll" :
-                                         IsAstcencSSE2Supported ? "astcenc-sse2-shared.dll" :
-                                         throw new PlatformNotSupportedException("The required CPU instructions for x64 architecture are not supported."),
+                            IsAstcencSSE41Supported ? "astcenc-sse4.1-shared.dll" :
+                            IsAstcencSSE2Supported ? "astcenc-sse2-shared.dll" :
+                            throw new PlatformNotSupportedException(
+                                "The required CPU instructions for x64 architecture are not supported."),
                         Architecture.Arm64 => IsAstcencSve256Supported ? "astcenc-arm-sve256-shared.dll" :
-                                          IsAstcencSve128Supported ? "astcenc-arm-sve128-shared.dll" :
-                                          IsAstcencNeonSupported ? "astcenc-arm-neon-shared.dll" :
-                                          throw new PlatformNotSupportedException("The required CPU instructions for ARM architecture are not supported."),
+                            IsAstcencSve128Supported ? "astcenc-arm-sve128-shared.dll" :
+                            IsAstcencNeonSupported ? "astcenc-arm-neon-shared.dll" :
+                            throw new PlatformNotSupportedException(
+                                "The required CPU instructions for ARM architecture are not supported."),
                         _ => throw new PlatformNotSupportedException("Unsupported architecture"),
-                    },
-                    PlatformID.Unix => RuntimeInformation.ProcessArchitecture switch
+                    };
+                }
+                else if (OperatingSystem.IsLinux())
+                {
+                    libraryFile = RuntimeInformation.ProcessArchitecture switch
                     {
                         Architecture.X64 => IsAstcencAvx2Supported ? "libastcenc-avx2-shared.so" :
-                                         IsAstcencSSE41Supported ? "libastcenc-sse4.1-shared.so" :
-                                         IsAstcencSSE2Supported ? "libastcenc-sse2-shared.so" :
-                                         throw new PlatformNotSupportedException("The required CPU instructions for x64 architecture are not supported."),
+                            IsAstcencSSE41Supported ? "libastcenc-sse4.1-shared.so" :
+                            IsAstcencSSE2Supported ? "libastcenc-sse2-shared.so" :
+                            throw new PlatformNotSupportedException(
+                                "The required CPU instructions for x64 architecture are not supported."),
                         Architecture.Arm64 => IsAstcencSve256Supported ? "libastcenc-sve256-shared.so" :
-                                          IsAstcencSve128Supported ? "libastcenc-sve128-shared.so" :
-                                          IsAstcencNeonSupported ? "libastcenc-neon-shared.so" :
-                                          throw new PlatformNotSupportedException("The required CPU instructions for ARM architecture are not supported."),
+                            IsAstcencSve128Supported ? "libastcenc-sve128-shared.so" :
+                            IsAstcencNeonSupported ? "libastcenc-neon-shared.so" :
+                            throw new PlatformNotSupportedException(
+                                "The required CPU instructions for ARM architecture are not supported."),
                         _ => throw new PlatformNotSupportedException("Unsupported architecture"),
-                    },
-                    PlatformID.MacOSX => "libastcenc-shared.dylib",
-                    _ => throw new PlatformNotSupportedException("Unsupported platform"),
-                };
+                    };
+                }
+                else if (OperatingSystem.IsMacOS())
+                {
+                    libraryFile = "libastcenc-shared.dylib";
+                }
+                else
+                {
+                    throw new PlatformNotSupportedException("Unsupported platform");
+                }
+                
                 return libraryFile;
             }
         }
