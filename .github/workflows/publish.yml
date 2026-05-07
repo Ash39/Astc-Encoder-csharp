@@ -18,6 +18,7 @@ env:
   DOTNET_NOLOGO: true
   NuGetDirectory: ${{ github.workspace}}/nuget
   GeneratedFilesDirectory: ${{ github.workspace}}/Astc-Encoder-CSharp
+  TestDirectory: ${{ github.workspace}}/Astc-Tests
 
 defaults:
   run:
@@ -29,7 +30,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Setup .NET
-      uses: actions/setup-dotnet@v5
+      uses: ./.github/dotnetsetup
     - name: Build Generator
       run: dotnet build Astc-Encoder-CSharp-Generator --configuration Release --output Generator
     - name: Run Generator
@@ -75,7 +76,7 @@ jobs:
 
     # Install the .NET SDK indicated in the global.json file
     - name: Setup .NET
-      uses: actions/setup-dotnet@v5
+      uses: ./.github/dotnetsetup
 
     # Create the NuGet package in the folder from the environment variable NuGetDirectory
     - run: dotnet pack Astc-Encoder-CSharp --configuration Release --output ${{ env.NuGetDirectory }}
@@ -94,7 +95,7 @@ jobs:
     steps:
       # Install the .NET SDK indicated in the global.json file
       - name: Setup .NET
-        uses: actions/setup-dotnet@v5
+        uses: ./.github/dotnetsetup
 
       # Download the NuGet package created in the previous job
       - uses: actions/download-artifact@v4
@@ -112,7 +113,7 @@ jobs:
       - name: Validate package
         run: meziantou.validate-nuget-package (Get-ChildItem "${{ env.NuGetDirectory }}/*.nupkg") --excluded-rules IconMustBeSet,ReadmeMustBeSet
 
-  run_test:
+  build_tests:
     runs-on: ubuntu-latest
     needs: [ build_generator ]
     steps:
@@ -130,12 +131,65 @@ jobs:
         name: runtimeFiles
         path: ${{ github.workspace}}/AstcEncoderTest/bin/Release/net10.0/runtimes
     - name: Setup .NET
-      uses: actions/setup-dotnet@v5
-    - name: Build all projects
-      run: dotnet build . --configuration Release
-    - name: Run tests
-      run: dotnet test --configuration Release
+      uses: ./.github/dotnetsetup
+    - name: Build AstcGeneratorTask Test
+      run: dotnet build AstcGeneratorTaskTest --configuration Release --output ${{ env.TestDirectory }}/AstcGeneratorTaskTest
+    - name: Build AstcEncoderTest Test
+      run: dotnet build AstcEncoderTest --configuration Release --output ${{ env.TestDirectory }}/AstcEncoderTest
+    - uses: actions/upload-artifact@v4
+      with:
+        name: testFiles
+        if-no-files-found: error
+        retention-days: 7
+        path: ${{ env.TestDirectory }}/* 
 
+  run_test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Linux
+          - os: ubuntu-24.04
+            arch: x64
+          - os: ubuntu-24.04-arm
+            arch: arm64
+
+          # Windows
+          - os: windows-2025
+            arch: x64
+          - os: windows-11-arm
+            arch: arm64
+
+          # macOS
+          - os: macos-15
+            arch: x64
+          - os: macos-15-xlarge
+            arch: arm64
+
+    runs-on: ${{ matrix.os }}
+
+    needs: [ build_tests ]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: testFiles
+          path: ${{ env.TestDirectory }}
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Run tests
+        shell: bash
+        run: |
+          dotnet test \
+            --test-modules "${{ env.TestDirectory }}/AstcGeneratorTaskTest/AstcGeneratorTaskTest.dll" \
+                           "${{ env.TestDirectory }}/AstcEncoderTest/AstcEncoderTest.dll" \
+            --no-build
   deploy:
     # Publish only when creating a GitHub Release
     # https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository
@@ -151,8 +205,8 @@ jobs:
           path: ${{ env.NuGetDirectory }}
 
       # Install the .NET SDK indicated in the global.json file
-      - name: Setup .NET Core
-        uses: actions/setup-dotnet@v5
+      - name: Setup .NET
+        uses: ./.github/dotnetsetup
 
       # Publish all NuGet packages to NuGet.org
       # Use --skip-duplicate to prevent errors if a package with the same version already exists.

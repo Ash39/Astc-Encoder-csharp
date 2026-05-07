@@ -10,5 +10,7 @@ namespace AstcEncoder
     public struct AstcencContext
     {
         internal IntPtr internal_context;
+
+        public static AstcencContext Null => new AstcencContext { internal_context = IntPtr.Zero };
     }
 }

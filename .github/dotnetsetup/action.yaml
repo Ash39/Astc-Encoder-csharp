@@ -1,0 +1,17 @@
+name: "Dotnet Setup"
+description: "Checkout code, set up Dotnet"
+inputs:
+  dotnet-version:
+    description: "Dotnet version (e.g., 10.0.x)"
+    required: true
+    default: "10.0.101"
+runs:
+  using: "composite" 
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+ 
+    - name: Setup .NET ${{ inputs.dotnet-version }}
+      uses: actions/setup-dotnet@v5
+      with:
+        dotnet-version: ${{ inputs.dotnet-version }}

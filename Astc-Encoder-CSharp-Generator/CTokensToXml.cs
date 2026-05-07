@@ -334,6 +334,13 @@ namespace Astc_Encoder_CSharp_Generator
 
             int j = 0;
 
+            while (returnType.Kind == TokenType.Keyword) 
+            {
+                returnType = temp[++j];
+            }
+
+            j = 0;
+
             if (ParseSpecifier(returnType.Value))
             {
                 newSpecifier:
@@ -369,7 +376,7 @@ namespace Astc_Encoder_CSharp_Generator
 
             while (advancedToken.Value != ")")
             {
-                if (advancedToken.Value == "(")
+                if (advancedToken.Value == "(" || advancedToken.Kind == TokenType.Keyword)
                 {
                     advancedToken = tokens[++i];
                     continue;
@@ -408,6 +415,7 @@ namespace Astc_Encoder_CSharp_Generator
                 if (advancedToken.Value == "," || advancedToken.Value == ")")
                 {
                     string[] nameSuffixSpilt = paramParts.Last().Split('[');
+
 
                     XmlElement paramElement = document.CreateElement("Param");
                     paramElement.SetAttribute("Name", nameSuffixSpilt[0]);

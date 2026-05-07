@@ -262,14 +262,15 @@ namespace AstcEncoder
         /// <param name="config">(in) Codec config.</param>
         /// <param name="threadCount">Thread count to configure for.</param>
         /// <param name="context">(out) Location to store an opaque context pointer.</param>
+        /// <param name="parentContext">(in) Optional parent context from which to inherit read-only data tables.</param>
         /// <returns>
         /// AstcencSuccess on success, or an error if context creation failed.
         /// </returns>
-        public unsafe static AstcencError AstcencContextAlloc(ref AstcencConfig config, uint threadCount, out AstcencContext context) 
+        public unsafe static AstcencError AstcencContextAlloc(ref AstcencConfig config, uint threadCount, out AstcencContext context, AstcencContext parentContext = default) 
         {
             AstcencContextInternal* astcencContext;
 
-            AstcencError status = AstcencUnmanaged.AstcencContextAlloc((AstcencConfig*)Unsafe.AsPointer(ref config), threadCount, &astcencContext);
+            AstcencError status = AstcencUnmanaged.AstcencContextAlloc((AstcencConfig*)Unsafe.AsPointer(ref config), threadCount, &astcencContext, (AstcencContextInternal*)parentContext.internal_context);
 
             context.internal_context = (IntPtr)astcencContext;
 

@@ -61,3 +61,4 @@ nunit-*.xml
 .vscode
 .fleet
 .idea
+/.artifacts/1
