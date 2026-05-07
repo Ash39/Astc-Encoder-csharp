@@ -120,9 +120,7 @@ namespace AstcEncoder
                             IsAstcencSSE2Supported ? "astcenc-sse2-shared.dll" :
                             throw new PlatformNotSupportedException(
                                 "The required CPU instructions for x64 architecture are not supported."),
-                        Architecture.Arm64 => IsAstcencSve256Supported ? "astcenc-arm-sve256-shared.dll" :
-                            IsAstcencSve128Supported ? "astcenc-arm-sve128-shared.dll" :
-                            IsAstcencNeonSupported ? "astcenc-arm-neon-shared.dll" :
+                        Architecture.Arm64 => IsAstcencNeonSupported ? "astcenc-arm-neon-shared.dll" :
                             throw new PlatformNotSupportedException(
                                 "The required CPU instructions for ARM architecture are not supported."),
                         _ => throw new PlatformNotSupportedException("Unsupported architecture"),
@@ -137,8 +135,8 @@ namespace AstcEncoder
                             IsAstcencSSE2Supported ? "libastcenc-sse2-shared.so" :
                             throw new PlatformNotSupportedException(
                                 "The required CPU instructions for x64 architecture are not supported."),
-                        Architecture.Arm64 => IsAstcencSve256Supported ? "libastcenc-sve256-shared.so" :
-                            IsAstcencSve128Supported ? "libastcenc-sve128-shared.so" :
+                        Architecture.Arm64 => IsAstcencSve256Supported ? "libastcenc-sve_256-shared.so" :
+                            IsAstcencSve128Supported ? "libastcenc-sve_128-shared.so" :
                             IsAstcencNeonSupported ? "libastcenc-neon-shared.so" :
                             throw new PlatformNotSupportedException(
                                 "The required CPU instructions for ARM architecture are not supported."),
