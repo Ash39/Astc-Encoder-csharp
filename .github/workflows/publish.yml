@@ -130,8 +130,20 @@ jobs:
       with:
         name: runtimeFiles
         path: ${{ github.workspace}}/AstcEncoderTest/bin/Release/net10.0/runtimes
+    - uses: actions/upload-artifact@v4
+      with:
+        name: jobstatedownload
+        if-no-files-found: error
+        retention-days: 7
+        path: ${{ github.workspace}}/* 
     - name: Setup .NET
       uses: ./.github/dotnetsetup
+    - uses: actions/upload-artifact@v4
+      with:
+        name: jobstatedownload2
+        if-no-files-found: error
+        retention-days: 7
+        path: ${{ github.workspace}}/* 
     - name: Build AstcGeneratorTask Test
       run: dotnet build AstcGeneratorTaskTest --configuration Release --output ${{ env.TestDirectory }}/AstcGeneratorTaskTest
     - name: Build AstcEncoderTest Test
