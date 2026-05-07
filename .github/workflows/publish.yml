@@ -61,12 +61,11 @@ jobs:
     needs: [ build_generator ]
     steps:
 
-    - name: Setup .NET
-      uses: ./.github/dotnetsetup
-
     - uses: actions/checkout@v4
       with:
-        fetch-depth: 0 # Get all history to allow automatic versioning using MinVer
+            fetch-depth: 0 # Get all history to allow automatic versioning using MinVer
+    - name: Setup .NET
+      uses: ./.github/dotnetsetup
 
     - uses: actions/download-artifact@v4
       with:
@@ -182,11 +181,8 @@ jobs:
 
       - name: Run tests
         shell: bash
-        run: |
-          dotnet test \
-            --test-modules "${{ env.TestDirectory }}/AstcGeneratorTaskTest/AstcGeneratorTaskTest.dll" \
-                           "${{ env.TestDirectory }}/AstcEncoderTest/AstcEncoderTest.dll" \
-            --no-build
+        run: dotnet test --test-modules "${{ env.TestDirectory }}/AstcGeneratorTaskTest/AstcGeneratorTaskTest.dll" "${{ env.TestDirectory }}/AstcEncoderTest/AstcEncoderTest.dll" --no-build
+
   deploy:
     # Publish only when creating a GitHub Release
     # https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository
