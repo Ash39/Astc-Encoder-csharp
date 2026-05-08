@@ -25,8 +25,19 @@ defaults:
     shell: pwsh
 
 jobs:
+  
+  generator_tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: ./.github/dotnetsetup
+    - name: Run AstcGeneratorTask Test
+      run: dotnet test --project ${{ github.workspace}}/AstcGeneratorTaskTest
+    
   build_generator:
     runs-on: ubuntu-latest
+    needs: [ generator_tests ]
     steps:
     - uses: actions/checkout@v4
     - name: Setup .NET
@@ -132,8 +143,6 @@ jobs:
       with:
         name: runtimeFiles
         path: ${{ github.workspace}}/AstcEncoderTest/bin/Release/net10.0/runtimes 
-    - name: Build AstcGeneratorTask Test
-      run: dotnet build AstcGeneratorTaskTest --configuration Release --output ${{ env.TestDirectory }}/AstcGeneratorTaskTest
     - name: Build AstcEncoderTest Test
       run: dotnet build AstcEncoderTest --configuration Release --output ${{ env.TestDirectory }}/AstcEncoderTest
     - uses: actions/upload-artifact@v4
@@ -182,7 +191,7 @@ jobs:
 
       - name: Run tests
         shell: bash
-        run: dotnet test --test-modules **/*Test.dll --no-build
+        run: dotnet test --test-modules  ${{ env.TestDirectory }}/**/*Test.dll --no-build
 
   deploy:
     # Publish only when creating a GitHub Release
