@@ -191,7 +191,7 @@ jobs:
 
       - name: Run tests
         shell: bash
-        run: dotnet test --test-modules  ${{ env.TestDirectory }}/**/*Test.dll --no-build
+        run: dotnet test --test-modules **/*Test.dll --no-build
 
   deploy:
     # Publish only when creating a GitHub Release
