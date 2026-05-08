@@ -120,7 +120,7 @@ namespace AstcEncoder
                             IsAstcencSSE2Supported ? "astcenc-sse2-shared.dll" :
                             throw new PlatformNotSupportedException(
                                 "The required CPU instructions for x64 architecture are not supported."),
-                        Architecture.Arm64 => IsAstcencNeonSupported ? "astcenc-arm-neon-shared.dll" :
+                        Architecture.Arm64 => IsAstcencNeonSupported ? "astcenc-neon-shared.dll" :
                             throw new PlatformNotSupportedException(
                                 "The required CPU instructions for ARM architecture are not supported."),
                         _ => throw new PlatformNotSupportedException("Unsupported architecture"),
