@@ -196,11 +196,9 @@ namespace AstcEncoder
                     switch (instruction)
                     {
                         case CpuInstruction.SVEC_128:
-#pragma warning disable SYSLIB5003 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
-                            return Sve.IsSupported && Vector128.IsHardwareAccelerated;
+                            return Vector128.IsHardwareAccelerated;
                         case CpuInstruction.SVEC_256:
-                            return Sve.IsSupported && Vector256.IsHardwareAccelerated;
-#pragma warning restore SYSLIB5003 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+                            return Vector256.IsHardwareAccelerated;
                         case CpuInstruction.NEON:
                             return AdvSimd.IsSupported;
                         default:
