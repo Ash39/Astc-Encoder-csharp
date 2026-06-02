@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
@@ -9,6 +10,8 @@ using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.Arm;
 using System.Runtime.Intrinsics.X86;
+using static System.Net.Mime.MediaTypeNames;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AstcEncoder
 {
@@ -293,8 +296,19 @@ namespace AstcEncoder
         /// </returns>
         public unsafe static AstcencError AstcencCompressImage(AstcencContext context, ref AstcencImage image, AstcencSwizzle swizzle, Span<byte> dataOut, uint threadIndex)
         {
-            fixed (void* dataPtr = image.data) 
+            int dimZ = (int)image.dimZ;
+
+            MemoryHandle[] memoryHandles = new MemoryHandle[image.data.Length];
+            byte** dataPtr = stackalloc byte*[image.data.Length];
+
+            try
             {
+                for (int i = 0; i < image.data.Length; i++)
+                {
+                    memoryHandles[i] = image.data[i].AsMemory().Pin();
+                    dataPtr[i] = (byte*)memoryHandles[i].Pointer;
+                }
+
                 fixed (byte* outDataPtr = dataOut)
                 {
                     Unsafe.SkipInit(out AstcencImageInternal nativeImage);
@@ -302,9 +316,44 @@ namespace AstcEncoder
                     nativeImage.dimY = image.dimY;
                     nativeImage.dimZ = image.dimZ;
                     nativeImage.dataType = image.dataType;
-                    nativeImage.data = &dataPtr;
+                    nativeImage.data = (void**)dataPtr;
 
                     return AstcencUnmanaged.AstcencCompressImage((AstcencContextInternal*)context.internal_context, &nativeImage, &swizzle, outDataPtr, (uint)dataOut.Length, threadIndex);
+                }
+            }
+            finally
+            {
+                foreach (var handle in memoryHandles)
+                    handle.Dispose();
+            }
+
+        }
+
+        /// <summary>
+        /// Compress an image.
+        /// </summary>
+        /// <remarks>
+        /// A single context can only compress or decompress a single image at a time.
+        ///
+        /// For a context configured for multi-threading, any set of the N threads can call this
+        /// function. Work will be dynamically scheduled across the threads available. Each thread
+        /// must have a unique thread_index.
+        /// </remarks>
+        /// <param name="context">Codec context.</param>
+        /// <param name="image">(in,out) An input image, in 2D slices.</param>
+        /// <param name="swizzle">Compression data swizzle, applied before compression.</param>
+        /// <param name="dataOut">(out) Span to output data array.</param>
+        /// <param name="threadIndex">Thread index [0..N-1] of calling thread.</param>
+        /// <returns>
+        /// AstcencSuccess on success, or an error if compression failed.
+        /// </returns>
+        public unsafe static AstcencError AstcencCompressImage(AstcencContext context, ref AstcencImageUnmanaged image, AstcencSwizzle swizzle, Span<byte> dataOut, uint threadIndex)
+        {
+            fixed (byte* outDataPtr = dataOut)
+            {
+                fixed (AstcencImageUnmanaged* imagePtr = &image)
+                {
+                    return AstcencUnmanaged.AstcencCompressImage((AstcencContextInternal*)context.internal_context, (AstcencImageInternal*)imagePtr, &swizzle, outDataPtr, (uint)dataOut.Length, threadIndex);
                 }
             }
         }
@@ -356,21 +405,61 @@ namespace AstcEncoder
         /// </returns>
         public unsafe static AstcencError AstcencDecompressImage(AstcencContext context, Span<byte> data, ref AstcencImage imageOut, AstcencSwizzle swizzle, uint threadIndex) 
         {
-            fixed (byte* dataPtr = data)
+            int dimZ = (int)imageOut.dimZ;
+
+            MemoryHandle[] memoryHandles = new MemoryHandle[imageOut.data.Length];
+            byte** outDataPtr = stackalloc byte*[imageOut.data.Length];
+
+            try
             {
-                fixed (void* outDataPtr = imageOut.data)
+                for (int i = 0; i < imageOut.data.Length; i++)
+                {
+                    memoryHandles[i] = imageOut.data[i].AsMemory().Pin();
+                    outDataPtr[i] = (byte*)memoryHandles[i].Pointer;
+                }
+
+                fixed (byte* dataPtr = data)
                 {
                     Unsafe.SkipInit(out AstcencImageInternal nativeImage);
                     nativeImage.dimX = imageOut.dimX;
                     nativeImage.dimY = imageOut.dimY;
                     nativeImage.dimZ = imageOut.dimZ;
                     nativeImage.dataType = imageOut.dataType;
-                    nativeImage.data = &outDataPtr;
+                    nativeImage.data = (void**)outDataPtr;
 
                     return AstcencUnmanaged.AstcencDecompressImage((AstcencContextInternal*)context.internal_context, dataPtr, (uint)data.Length, &nativeImage, &swizzle, threadIndex);
                 }
             }
+            finally
+            {
+                foreach (var handle in memoryHandles)
+                    handle.Dispose();
+            }
         }
+
+
+        /// <summary>
+        /// Decompress an image.
+        /// </summary>
+        /// <param name="context">Codec context.</param>
+        /// <param name="data">(in) Span to compressed data.</param>
+        /// <param name="imageOut">(in,out) Output image.</param>
+        /// <param name="swizzle">Decompression data swizzle, applied after decompression.</param>
+        /// <param name="threadIndex">Thread index [0..N-1] of calling thread.</param>
+        /// <returns>
+        /// AstcencSuccess on success, or an error if decompression failed.
+        /// </returns>
+        public unsafe static AstcencError AstcencDecompressImage(AstcencContext context, Span<byte> data, ref AstcencImageUnmanaged imageOut, AstcencSwizzle swizzle, uint threadIndex)
+        {
+            fixed (byte* dataPtr = data)
+            {
+                fixed (AstcencImageUnmanaged* imagePtr = &imageOut)
+                {
+                    return AstcencUnmanaged.AstcencDecompressImage((AstcencContextInternal*)context.internal_context, dataPtr, (uint)data.Length, (AstcencImageInternal*)imagePtr, &swizzle, threadIndex);
+                }
+            }
+        }
+
         /// <summary>
         /// Reset the codec state for a new decompression.
         /// </summary>

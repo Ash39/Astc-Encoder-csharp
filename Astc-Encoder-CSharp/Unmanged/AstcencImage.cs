@@ -9,7 +9,7 @@ namespace AstcEncoder
     /// 3D image are passed in as an array of 2D slices. Each slice has identical size and color format.
     /// </summary>
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
-    public struct AstcencImage
+    public unsafe struct AstcencImageUnmanaged
     {
         /// <summary>
         /// The X dimension of the image, in texels.
@@ -30,6 +30,6 @@ namespace AstcEncoder
         /// <summary>
         /// The array of 2D slices, of length <c>dim_z</c>.
         /// </summary>
-        public byte[][] data;
+        public byte** data;
     }
 }

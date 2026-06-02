@@ -19,18 +19,8 @@
   <ItemGroup>
     <Folder Include="Files\" />
   </ItemGroup>
-
   <ItemGroup>
-    <None Update="Files\ldr-rgb-diffuse.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Files\ldr-rgb-emissive.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Files\ldr-rgb-metalrough.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Files\ldr-rgb-metalrough2.png">
+    <None Update="Files\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

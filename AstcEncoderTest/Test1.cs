@@ -11,13 +11,21 @@ namespace AstcEncoderTest
     public sealed class Test1
     {
         private static (int height, int width, byte[] imageBytes)[]? images;
+        private static (int height, int width, byte[] imageBytes)[]? volumeImages;
 
         [ClassInitialize]
         public static void ClassInit(TestContext context)
         {
             string[] files = Directory.GetFiles("Files");
+            string[] VolumeFiles = Directory.GetFiles("Files/128x128/Cracks");
 
-            images = new (int, int, byte[])[files.Length];
+            images = LoadImages(files);
+            volumeImages = LoadImages(VolumeFiles);
+        }
+
+        private static (int, int, byte[])[] LoadImages(string[] files)
+        {
+            var images = new (int, int, byte[])[files.Length];
 
             for (int i = 0; i < files.Length; i++)
             {
@@ -34,6 +42,8 @@ namespace AstcEncoderTest
                     images[i] = imageInfo;
                 }
             }
+
+            return images;
         }
 
         [ClassCleanup]
@@ -77,7 +87,7 @@ namespace AstcEncoderTest
             outImage.dimY = 12;
             outImage.dimZ = 1;
             outImage.dataType = AstcencType.AstcencTypeU8;
-            outImage.data = output;
+            outImage.data = [output];
 
             status = Astcenc.AstcencDecompressImage(context, data, ref outImage, swizzle, 0);
 
@@ -137,7 +147,7 @@ namespace AstcEncoderTest
             image.dimY = (uint)height;
             image.dimZ = 1;
             image.dataType = AstcencType.AstcencTypeU8;
-            image.data = imageBytes;
+            image.data = [imageBytes];
 
             uint block_count_x = ((uint)width + block_x - 1) / block_x;
             uint block_count_y = ((uint)height + block_y - 1) / block_y;
@@ -156,12 +166,95 @@ namespace AstcEncoderTest
             outImage.dimY = (uint)height;
             outImage.dimZ = 1;
             outImage.dataType = AstcencType.AstcencTypeU8;
-            outImage.data = decompressedBytes;
+            outImage.data = [decompressedBytes];
 
             status = Astcenc.AstcencDecompressImage(context, comp_data, ref outImage, swizzle, 0);
 
             Assert.AreEqual(AstcencError.AstcencSuccess, status);
             Assert.HasCount(imageBytes.Length, decompressedBytes);
+
+            Astcenc.AstcencContextFree(context);
+        }
+
+        [TestMethod]
+        public void EncodeAndDecodeVolumeTextureTest()
+        {
+            const uint thread_count = 1;
+            const uint block_x = 4;
+            const uint block_y = 4;
+            const uint block_z = 4;
+            const AstcencProfile profile = AstcencProfile.AstcencPrfLdr;
+            float quality = Astcenc.AstcencPreMedium;
+            AstcencSwizzle swizzle = new AstcencSwizzle()
+            {
+                r = AstcencSwz.AstcencSwzR,
+                g = AstcencSwz.AstcencSwzG,
+                b = AstcencSwz.AstcencSwzB,
+                a = AstcencSwz.AstcencSwzA
+
+            };
+
+            AstcencError status = Astcenc.AstcencConfigInit(profile, block_x, block_y, block_z, quality, 0, out AstcencConfig config);
+
+            Assert.AreEqual(AstcencError.AstcencSuccess, status);
+
+            AstcencContext context;
+
+            status = Astcenc.AstcencContextAlloc(ref config, thread_count, out context);
+
+            Assert.AreEqual(AstcencError.AstcencSuccess, status);
+
+            (int height, int width, byte[] imageBytes) = volumeImages![0];
+
+            byte[][] slices = new byte[volumeImages!.Length][];
+
+            for (int i = 0; i < volumeImages.Length; i++)
+            {
+                (int h, int w, byte[] bytes) = volumeImages[i];
+                slices[i] = bytes;
+            }
+
+            AstcencImage image;
+            image.dimX = (uint)width;
+            image.dimY = (uint)height;
+            image.dimZ = (uint)volumeImages!.Length;
+            image.dataType = AstcencType.AstcencTypeU8;
+            image.data = slices;
+
+            uint block_count_x = ((uint)width + block_x - 1) / block_x;
+            uint block_count_y = ((uint)height + block_y - 1) / block_y;
+            uint block_count_z = ((uint)volumeImages!.Length + block_z - 1) / block_z;
+
+            uint compLen = block_count_x * block_count_y * block_count_z * 16;
+            byte[] comp_data = new byte[compLen];
+
+            status = Astcenc.AstcencCompressImage(context, ref image, swizzle, comp_data, 0);
+
+            Assert.AreEqual(AstcencError.AstcencSuccess, status);
+
+            byte[][] decompressedBytes = new byte[volumeImages!.Length][];
+
+            for (int i = 0; i < volumeImages!.Length; i++)
+            {
+                decompressedBytes[i] = new byte[imageBytes.Length];
+            }
+
+            AstcencImage outImage;
+            outImage.dimX = (uint)width;
+            outImage.dimY = (uint)height;
+            outImage.dimZ = (uint)volumeImages!.Length;
+            outImage.dataType = AstcencType.AstcencTypeU8;
+            outImage.data = decompressedBytes;
+
+            status = Astcenc.AstcencDecompressImage(context, comp_data, ref outImage, swizzle, 0);
+
+            Assert.AreEqual(AstcencError.AstcencSuccess, status);
+            Assert.HasCount(volumeImages!.Length, decompressedBytes);
+
+            for (int i = 0; i < decompressedBytes.Length; i++)
+            {
+                Assert.HasCount(imageBytes.Length, decompressedBytes[i]);
+            }
 
             Astcenc.AstcencContextFree(context);
         }
@@ -202,7 +295,7 @@ namespace AstcEncoderTest
             image.dimY = (uint)height;
             image.dimZ = 1;
             image.dataType = AstcencType.AstcencTypeU8;
-            image.data = imageBytes;
+            image.data = [imageBytes];
 
             uint block_count_x = ((uint)width + block_x - 1) / block_x;
             uint block_count_y = ((uint)height + block_y - 1) / block_y;
@@ -285,7 +378,7 @@ namespace AstcEncoderTest
                                 dimY = (uint)height,
                                 dimZ = 1,
                                 dataType = AstcencType.AstcencTypeU8,
-                                data = imageBytes
+                                data = [imageBytes]
                             };
 
                             AstcencError err = Astcenc.AstcencCompressImage(
